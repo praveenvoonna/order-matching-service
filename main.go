@@ -9,10 +9,9 @@ import (
 )
 
 func main() {
-	var db database.Database
-	db = &database.PostgresDatabase{}
+	db := &database.PostgresDatabase{}
 
-	db.ConnectToDatabase()
+	db.Connect()
 
 	http.HandleFunc("/orders", func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetOrdersHandler(w, r, db)

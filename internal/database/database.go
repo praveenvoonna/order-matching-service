@@ -11,7 +11,7 @@ type PostgresDatabase struct {
 	DB *sql.DB
 }
 
-func (p *PostgresDatabase) ConnectToDatabase() *sql.DB {
+func (p *PostgresDatabase) Connect() *sql.DB {
 	var err error
 	p.DB, err = sql.Open("postgres", "postgres://postgres:112233@localhost/postgres?sslmode=disable")
 	if err != nil {
