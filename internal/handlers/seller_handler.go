@@ -10,7 +10,7 @@ import (
 )
 
 func GetSellersHandler(w http.ResponseWriter, r *http.Request, db database.Database) {
-	rows, err := db.Query("SELECT id, name FROM order_service.sellers")
+	rows, err := db.QueryRows("SELECT id, name FROM order_service.sellers")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -65,7 +65,7 @@ func UpdateSellerHandler(w http.ResponseWriter, r *http.Request, db database.Dat
 	}
 
 	statement := `UPDATE order_service.sellers SET name = $1 WHERE id = $2`
-	_, err = db.Exec(statement, seller.Name, sellerID)
+	_, err = db.Execute(statement, seller.Name, sellerID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -83,7 +83,7 @@ func DeleteSellerHandler(w http.ResponseWriter, r *http.Request, db database.Dat
 	}
 
 	statement := `DELETE FROM order_service.sellers WHERE id = $1`
-	_, err = db.Exec(statement, sellerID)
+	_, err = db.Execute(statement, sellerID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

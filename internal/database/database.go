@@ -27,7 +27,7 @@ func (p *PostgresDatabase) ConnectToDatabase() *sql.DB {
 	return p.DB
 }
 
-func (p *PostgresDatabase) Exec(query string, args ...interface{}) (sql.Result, error) {
+func (p *PostgresDatabase) Execute(query string, args ...interface{}) (sql.Result, error) {
 	result, err := p.DB.Exec(query, args...)
 	if err != nil {
 		log.Fatal(err)
@@ -35,7 +35,7 @@ func (p *PostgresDatabase) Exec(query string, args ...interface{}) (sql.Result, 
 	return result, nil
 }
 
-func (p *PostgresDatabase) Query(query string, args ...interface{}) (*sql.Rows, error) {
+func (p *PostgresDatabase) QueryRows(query string, args ...interface{}) (*sql.Rows, error) {
 	rows, err := p.DB.Query(query, args...)
 	if err != nil {
 		log.Fatal(err)

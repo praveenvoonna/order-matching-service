@@ -10,7 +10,7 @@ import (
 )
 
 func GetOrdersHandler(w http.ResponseWriter, r *http.Request, db database.Database) {
-	rows, err := db.Query("SELECT id, product, quantity, price FROM order_service.orders")
+	rows, err := db.QueryRows("SELECT id, buyer_id, seller_id, quantity, price, status FROM order_service.orders")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -20,7 +20,7 @@ func GetOrdersHandler(w http.ResponseWriter, r *http.Request, db database.Databa
 	var orders []models.Order
 	for rows.Next() {
 		var order models.Order
-		err := rows.Scan(&order.ID, &order.Product, &order.Quantity, &order.Price)
+		err := rows.Scan(&order.ID, &order.BuyerID, &order.SellerID, &order.Quantity, &order.Price, &order.Status)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -39,8 +39,8 @@ func CreateOrderHandler(w http.ResponseWriter, r *http.Request, db database.Data
 		return
 	}
 
-	statement := `INSERT INTO order_service.orders (product, quantity, price) VALUES ($1, $2, $3) RETURNING id`
-	err = db.QueryRow(statement, order.Product, order.Quantity, order.Price).Scan(&order.ID)
+	statement := `INSERT INTO order_service.orders (buyer_id, seller_id, quantity, price, status) VALUES ($1, $2, $3, $4, $5) RETURNING id`
+	err = db.QueryRow(statement, order.BuyerID, order.SellerID, order.Quantity, order.Price, order.Status).Scan(&order.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -64,8 +64,8 @@ func UpdateOrderHandler(w http.ResponseWriter, r *http.Request, db database.Data
 		return
 	}
 
-	statement := `UPDATE order_service.orders SET product = $1, quantity = $2, price = $3 WHERE id = $4`
-	_, err = db.Exec(statement, order.Product, order.Quantity, order.Price, orderID)
+	statement := `UPDATE order_service.orders SET buyer_id = $1, seller_id = $2, quantity = $3, price = $4, status = $5 WHERE id = $6`
+	_, err = db.Execute(statement, order.BuyerID, order.SellerID, order.Quantity, order.Price, order.Status, orderID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -83,7 +83,7 @@ func DeleteOrderHandler(w http.ResponseWriter, r *http.Request, db database.Data
 	}
 
 	statement := `DELETE FROM order_service.orders WHERE id = $1`
-	_, err = db.Exec(statement, orderID)
+	_, err = db.Execute(statement, orderID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
