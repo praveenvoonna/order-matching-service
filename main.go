@@ -10,72 +10,74 @@ import (
 
 func main() {
 	db := &database.PostgresDatabase{}
-
 	db.Connect()
 
-	http.HandleFunc("/products", func(w http.ResponseWriter, r *http.Request) {
-		handlers.GetProductsHandler(w, r, db)
+	productHandler := handlers.NewProductHandler(db)
+	orderHandler := handlers.NewOrderHandler(db)
+	buyerHandler := handlers.NewBuyerHandler(db)
+	sellerHandler := handlers.NewSellerHandler(db)
+
+	router := http.NewServeMux()
+
+	router.HandleFunc("/products", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			productHandler.GetProducts(w, r)
+		case "POST":
+			productHandler.CreateProduct(w, r)
+		case "PUT":
+			productHandler.UpdateProduct(w, r)
+		case "DELETE":
+			productHandler.DeleteProduct(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
 	})
 
-	http.HandleFunc("/create_product", func(w http.ResponseWriter, r *http.Request) {
-		handlers.CreateProductHandler(w, r, db)
+	router.HandleFunc("/orders", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			orderHandler.GetOrders(w, r)
+		case "POST":
+			orderHandler.CreateOrder(w, r)
+		case "PUT":
+			orderHandler.UpdateOrder(w, r)
+		case "DELETE":
+			orderHandler.DeleteOrder(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
 	})
 
-	http.HandleFunc("/update_product", func(w http.ResponseWriter, r *http.Request) {
-		handlers.UpdateProductHandler(w, r, db)
+	router.HandleFunc("/buyers", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			buyerHandler.GetBuyers(w, r)
+		case "POST":
+			buyerHandler.CreateBuyer(w, r)
+		case "PUT":
+			buyerHandler.UpdateBuyer(w, r)
+		case "DELETE":
+			buyerHandler.DeleteBuyer(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
 	})
 
-	http.HandleFunc("/delete_product", func(w http.ResponseWriter, r *http.Request) {
-		handlers.DeleteProductHandler(w, r, db)
+	router.HandleFunc("/sellers", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			sellerHandler.GetSellers(w, r)
+		case "POST":
+			sellerHandler.CreateSeller(w, r)
+		case "PUT":
+			sellerHandler.UpdateSeller(w, r)
+		case "DELETE":
+			sellerHandler.DeleteSeller(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
 	})
 
-	http.HandleFunc("/orders", func(w http.ResponseWriter, r *http.Request) {
-		handlers.GetOrdersHandler(w, r, db)
-	})
-
-	http.HandleFunc("/create_order", func(w http.ResponseWriter, r *http.Request) {
-		handlers.CreateOrderHandler(w, r, db)
-	})
-
-	http.HandleFunc("/update_order", func(w http.ResponseWriter, r *http.Request) {
-		handlers.UpdateOrderHandler(w, r, db)
-	})
-
-	http.HandleFunc("/delete_order", func(w http.ResponseWriter, r *http.Request) {
-		handlers.DeleteOrderHandler(w, r, db)
-	})
-
-	http.HandleFunc("/buyers", func(w http.ResponseWriter, r *http.Request) {
-		handlers.GetBuyersHandler(w, r, db)
-	})
-
-	http.HandleFunc("/create_buyer", func(w http.ResponseWriter, r *http.Request) {
-		handlers.CreateBuyerHandler(w, r, db)
-	})
-
-	http.HandleFunc("/update_buyer", func(w http.ResponseWriter, r *http.Request) {
-		handlers.UpdateBuyerHandler(w, r, db)
-	})
-
-	http.HandleFunc("/delete_buyer", func(w http.ResponseWriter, r *http.Request) {
-		handlers.DeleteBuyerHandler(w, r, db)
-	})
-
-	http.HandleFunc("/sellers", func(w http.ResponseWriter, r *http.Request) {
-		handlers.GetSellersHandler(w, r, db)
-	})
-
-	http.HandleFunc("/create_seller", func(w http.ResponseWriter, r *http.Request) {
-		handlers.CreateSellerHandler(w, r, db)
-	})
-
-	http.HandleFunc("/update_seller", func(w http.ResponseWriter, r *http.Request) {
-		handlers.UpdateSellerHandler(w, r, db)
-	})
-
-	http.HandleFunc("/delete_seller", func(w http.ResponseWriter, r *http.Request) {
-		handlers.DeleteSellerHandler(w, r, db)
-	})
-
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8080", router))
 }

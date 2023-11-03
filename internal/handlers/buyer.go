@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -9,10 +10,19 @@ import (
 	"github.com/praveenvoonna/order-matching-service/pkg/models"
 )
 
-func GetBuyersHandler(w http.ResponseWriter, r *http.Request, db database.Database) {
-	rows, err := db.QueryRows("SELECT id, name FROM order_service.buyers")
+type BuyerHandler struct {
+	DB database.Database
+}
+
+func NewBuyerHandler(db database.Database) *BuyerHandler {
+	return &BuyerHandler{DB: db}
+}
+
+func (bh *BuyerHandler) GetBuyers(w http.ResponseWriter, r *http.Request) {
+	rows, err := bh.DB.QueryRows("SELECT id, name FROM order_service.buyers")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println("Error querying buyers:", err)
+		http.Error(w, "Failed to fetch buyers", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -22,27 +32,40 @@ func GetBuyersHandler(w http.ResponseWriter, r *http.Request, db database.Databa
 		var buyer models.Buyer
 		err := rows.Scan(&buyer.ID, &buyer.Name)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Println("Error scanning buyer:", err)
+			http.Error(w, "Failed to fetch buyers", http.StatusInternalServerError)
 			return
 		}
 		buyers = append(buyers, buyer)
 	}
 
-	json.NewEncoder(w).Encode(buyers)
+	if len(buyers) == 0 {
+		log.Println("No buyers found")
+		http.Error(w, "No buyers found", http.StatusNotFound)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(buyers); err != nil {
+		log.Println("Error encoding buyers:", err)
+		http.Error(w, "Failed to fetch buyers", http.StatusInternalServerError)
+		return
+	}
 }
 
-func CreateBuyerHandler(w http.ResponseWriter, r *http.Request, db database.Database) {
+func (bh *BuyerHandler) CreateBuyer(w http.ResponseWriter, r *http.Request) {
 	var buyer models.Buyer
 	err := json.NewDecoder(r.Body).Decode(&buyer)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println("Error decoding buyer:", err)
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
 	statement := `INSERT INTO order_service.buyers (name) VALUES ($1) RETURNING id`
-	err = db.QueryRow(statement, buyer.Name).Scan(&buyer.ID)
+	err = bh.DB.QueryRow(statement, buyer.Name).Scan(&buyer.ID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println("Error creating buyer:", err)
+		http.Error(w, "Failed to create buyer", http.StatusInternalServerError)
 		return
 	}
 
@@ -50,24 +73,27 @@ func CreateBuyerHandler(w http.ResponseWriter, r *http.Request, db database.Data
 	json.NewEncoder(w).Encode(buyer)
 }
 
-func UpdateBuyerHandler(w http.ResponseWriter, r *http.Request, db database.Database) {
+func (bh *BuyerHandler) UpdateBuyer(w http.ResponseWriter, r *http.Request) {
 	var buyer models.Buyer
 	err := json.NewDecoder(r.Body).Decode(&buyer)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println("Error decoding buyer:", err)
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
 	buyerID, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil {
+		log.Println("Invalid buyer ID:", err)
 		http.Error(w, "Invalid buyer ID", http.StatusBadRequest)
 		return
 	}
 
 	statement := `UPDATE order_service.buyers SET name = $1 WHERE id = $2`
-	_, err = db.Execute(statement, buyer.Name, buyerID)
+	_, err = bh.DB.Execute(statement, buyer.Name, buyerID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println("Error updating buyer:", err)
+		http.Error(w, "Failed to update buyer", http.StatusInternalServerError)
 		return
 	}
 
@@ -75,17 +101,19 @@ func UpdateBuyerHandler(w http.ResponseWriter, r *http.Request, db database.Data
 	json.NewEncoder(w).Encode(buyer)
 }
 
-func DeleteBuyerHandler(w http.ResponseWriter, r *http.Request, db database.Database) {
+func (bh *BuyerHandler) DeleteBuyer(w http.ResponseWriter, r *http.Request) {
 	buyerID, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil {
+		log.Println("Invalid buyer ID:", err)
 		http.Error(w, "Invalid buyer ID", http.StatusBadRequest)
 		return
 	}
 
 	statement := `DELETE FROM order_service.buyers WHERE id = $1`
-	_, err = db.Execute(statement, buyerID)
+	_, err = bh.DB.Execute(statement, buyerID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println("Error deleting buyer:", err)
+		http.Error(w, "Failed to delete buyer", http.StatusInternalServerError)
 		return
 	}
 

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -9,10 +10,19 @@ import (
 	"github.com/praveenvoonna/order-matching-service/pkg/models"
 )
 
-func GetSellersHandler(w http.ResponseWriter, r *http.Request, db database.Database) {
-	rows, err := db.QueryRows("SELECT id, name FROM order_service.sellers")
+type SellerHandler struct {
+	DB database.Database
+}
+
+func NewSellerHandler(db database.Database) *SellerHandler {
+	return &SellerHandler{DB: db}
+}
+
+func (sh *SellerHandler) GetSellers(w http.ResponseWriter, r *http.Request) {
+	rows, err := sh.DB.QueryRows("SELECT id, name FROM order_service.sellers")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println("Error querying sellers:", err)
+		http.Error(w, "Failed to fetch sellers", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -22,27 +32,40 @@ func GetSellersHandler(w http.ResponseWriter, r *http.Request, db database.Datab
 		var seller models.Seller
 		err := rows.Scan(&seller.ID, &seller.Name)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			log.Println("Error scanning seller:", err)
+			http.Error(w, "Failed to fetch sellers", http.StatusInternalServerError)
 			return
 		}
 		sellers = append(sellers, seller)
 	}
 
-	json.NewEncoder(w).Encode(sellers)
+	if len(sellers) == 0 {
+		log.Println("No sellers found")
+		http.Error(w, "No sellers found", http.StatusNotFound)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(sellers); err != nil {
+		log.Println("Error encoding sellers:", err)
+		http.Error(w, "Failed to fetch sellers", http.StatusInternalServerError)
+		return
+	}
 }
 
-func CreateSellerHandler(w http.ResponseWriter, r *http.Request, db database.Database) {
+func (sh *SellerHandler) CreateSeller(w http.ResponseWriter, r *http.Request) {
 	var seller models.Seller
 	err := json.NewDecoder(r.Body).Decode(&seller)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println("Error decoding seller:", err)
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
 	statement := `INSERT INTO order_service.sellers (name) VALUES ($1) RETURNING id`
-	err = db.QueryRow(statement, seller.Name).Scan(&seller.ID)
+	err = sh.DB.QueryRow(statement, seller.Name).Scan(&seller.ID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println("Error creating seller:", err)
+		http.Error(w, "Failed to create seller", http.StatusInternalServerError)
 		return
 	}
 
@@ -50,24 +73,27 @@ func CreateSellerHandler(w http.ResponseWriter, r *http.Request, db database.Dat
 	json.NewEncoder(w).Encode(seller)
 }
 
-func UpdateSellerHandler(w http.ResponseWriter, r *http.Request, db database.Database) {
+func (sh *SellerHandler) UpdateSeller(w http.ResponseWriter, r *http.Request) {
 	var seller models.Seller
 	err := json.NewDecoder(r.Body).Decode(&seller)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Println("Error decoding seller:", err)
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
 	sellerID, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil {
+		log.Println("Invalid seller ID:", err)
 		http.Error(w, "Invalid seller ID", http.StatusBadRequest)
 		return
 	}
 
 	statement := `UPDATE order_service.sellers SET name = $1 WHERE id = $2`
-	_, err = db.Execute(statement, seller.Name, sellerID)
+	_, err = sh.DB.Execute(statement, seller.Name, sellerID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println("Error updating seller:", err)
+		http.Error(w, "Failed to update seller", http.StatusInternalServerError)
 		return
 	}
 
@@ -75,17 +101,19 @@ func UpdateSellerHandler(w http.ResponseWriter, r *http.Request, db database.Dat
 	json.NewEncoder(w).Encode(seller)
 }
 
-func DeleteSellerHandler(w http.ResponseWriter, r *http.Request, db database.Database) {
+func (sh *SellerHandler) DeleteSeller(w http.ResponseWriter, r *http.Request) {
 	sellerID, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil {
+		log.Println("Invalid seller ID:", err)
 		http.Error(w, "Invalid seller ID", http.StatusBadRequest)
 		return
 	}
 
 	statement := `DELETE FROM order_service.sellers WHERE id = $1`
-	_, err = db.Execute(statement, sellerID)
+	_, err = sh.DB.Execute(statement, sellerID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Println("Error deleting seller:", err)
+		http.Error(w, "Failed to delete seller", http.StatusInternalServerError)
 		return
 	}
 
