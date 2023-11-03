@@ -13,6 +13,22 @@ func main() {
 
 	db.Connect()
 
+	http.HandleFunc("/products", func(w http.ResponseWriter, r *http.Request) {
+		handlers.GetProductsHandler(w, r, db)
+	})
+
+	http.HandleFunc("/create_product", func(w http.ResponseWriter, r *http.Request) {
+		handlers.CreateProductHandler(w, r, db)
+	})
+
+	http.HandleFunc("/update_product", func(w http.ResponseWriter, r *http.Request) {
+		handlers.UpdateProductHandler(w, r, db)
+	})
+
+	http.HandleFunc("/delete_product", func(w http.ResponseWriter, r *http.Request) {
+		handlers.DeleteProductHandler(w, r, db)
+	})
+
 	http.HandleFunc("/orders", func(w http.ResponseWriter, r *http.Request) {
 		handlers.GetOrdersHandler(w, r, db)
 	})
