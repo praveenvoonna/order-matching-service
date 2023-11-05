@@ -13,12 +13,12 @@ type PostgresDatabase struct {
 
 func (p *PostgresDatabase) Connect() *sql.DB {
 	var err error
+	// change below connection string as sql.Open("postgres", "database://username:password@localhost/postgres?sslmode=disable")
 	p.DB, err = sql.Open("postgres", "postgres://postgres:112233@localhost/postgres?sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Check the connection
 	err = p.DB.Ping()
 	if err != nil {
 		log.Fatal(err)

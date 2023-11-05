@@ -14,8 +14,6 @@ CREATE TABLE IF NOT EXISTS order_service.buyers (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    budget NUMERIC NOT NULL,
-    quantity INTEGER NOT NULL,
     product_id INTEGER REFERENCES order_service.products(id)
 );
 
@@ -23,9 +21,7 @@ CREATE TABLE IF NOT EXISTS order_service.sellers (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    quantity INTEGER NOT NULL,
-    price NUMERIC NOT NULL,
-    product VARCHAR(255) NOT NULL
+    product_id INTEGER REFERENCES order_service.products(id)
 );
 
 CREATE TABLE IF NOT EXISTS order_service.orders (

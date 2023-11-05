@@ -19,7 +19,7 @@ func NewSellerHandler(db database.Database) *SellerHandler {
 }
 
 func (sh *SellerHandler) GetSellers(w http.ResponseWriter, r *http.Request) {
-	rows, err := sh.DB.QueryRows("SELECT id, name FROM order_service.sellers")
+	rows, err := sh.DB.QueryRows("SELECT id, name, email, product_id FROM order_service.sellers")
 	if err != nil {
 		log.Println("Error querying sellers:", err)
 		http.Error(w, "Failed to fetch sellers", http.StatusInternalServerError)
@@ -30,7 +30,7 @@ func (sh *SellerHandler) GetSellers(w http.ResponseWriter, r *http.Request) {
 	var sellers []models.Seller
 	for rows.Next() {
 		var seller models.Seller
-		err := rows.Scan(&seller.ID, &seller.Name)
+		err := rows.Scan(&seller.ID, &seller.Name, &seller.Email, &seller.ProductID)
 		if err != nil {
 			log.Println("Error scanning seller:", err)
 			http.Error(w, "Failed to fetch sellers", http.StatusInternalServerError)
@@ -61,8 +61,8 @@ func (sh *SellerHandler) CreateSeller(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	statement := `INSERT INTO order_service.sellers (name) VALUES ($1) RETURNING id`
-	err = sh.DB.QueryRow(statement, seller.Name).Scan(&seller.ID)
+	statement := `INSERT INTO order_service.sellers (name, email, product_id) VALUES ($1, $2, $3) RETURNING id`
+	err = sh.DB.QueryRow(statement, seller.Name, seller.Email, seller.ProductID).Scan(&seller.ID)
 	if err != nil {
 		log.Println("Error creating seller:", err)
 		http.Error(w, "Failed to create seller", http.StatusInternalServerError)
@@ -89,8 +89,8 @@ func (sh *SellerHandler) UpdateSeller(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	statement := `UPDATE order_service.sellers SET name = $1 WHERE id = $2`
-	_, err = sh.DB.Execute(statement, seller.Name, sellerID)
+	statement := `UPDATE order_service.sellers SET name = $1, email = $2, product_id = $3 WHERE id = $4`
+	_, err = sh.DB.Execute(statement, seller.Name, seller.Email, seller.ProductID, sellerID)
 	if err != nil {
 		log.Println("Error updating seller:", err)
 		http.Error(w, "Failed to update seller", http.StatusInternalServerError)

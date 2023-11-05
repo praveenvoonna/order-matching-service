@@ -1,10 +1,8 @@
 package models
 
 type Seller struct {
-	ID       int
-	Name     string
-	Email    string
-	Quantity int
-	Price    float64
-	Product  string
+	ID        int    `json:"id"`
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	ProductID int    `json:"product_id"` // Foreign key referencing the Product
 }

@@ -35,7 +35,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"product\": \"product3\",\r\n    \"quantity\": 10,\r\n    \"price\": 100\r\n}",
+							"raw": "{\r\n  \"buyer_id\": 3,\r\n  \"seller_id\": 12,\r\n  \"quantity\": 5,\r\n  \"price\": 100.00,\r\n  \"status\": \"pending\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -63,38 +63,13 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"product\": \"product1_updated\",\r\n    \"quantity\": 20,\r\n    \"price\": 150\r\n}",
+							"raw": "{\r\n  \"buyer_id\": 3,\r\n  \"seller_id\": 12,\r\n  \"quantity\": 5,\r\n  \"price\": 100.00,\r\n  \"status\": \"fulfilled\"\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "http://localhost:8080/orders?id=1",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"orders"
-							],
-							"query": [
-								{
-									"key": "id",
-									"value": "1"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete a order",
-					"request": {
-						"method": "DELETE",
-						"header": [],
 						"url": {
 							"raw": "http://localhost:8080/orders?id=3",
 							"protocol": "http",
@@ -109,6 +84,31 @@
 								{
 									"key": "id",
 									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a order",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/orders?id=4",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"orders"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "4"
 								}
 							]
 						}
@@ -146,7 +146,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"John Doe\"\r\n}",
+							"raw": "{\r\n  \"name\": \"John Doe\",\r\n  \"email\": \"johndoe@example.com\",\r\n  \"product_id\": 7\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -174,7 +174,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Jane Doe\"\r\n}",
+							"raw": "{\r\n  \"name\": \"Update Doe\",\r\n  \"email\": \"updatejohndoe@example.com\",\r\n  \"product_id\": 7\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -182,7 +182,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/buyers?id=3",
+							"raw": "http://localhost:8080/buyers?id=2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -194,7 +194,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "3"
+									"value": "2"
 								}
 							]
 						}
@@ -257,7 +257,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Seller1\"\r\n}",
+							"raw": "{\r\n  \"name\": \"Seller Name\",\r\n  \"email\": \"seller@example.com\",\r\n  \"product_id\": 7\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -285,7 +285,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Seller4_updated\"\r\n}",
+							"raw": "{\r\n  \"name\": \"Update Name\",\r\n  \"email\": \"update@example.com\",\r\n  \"product_id\": 7\r\n}\r\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -293,7 +293,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/sellers?id=4",
+							"raw": "http://localhost:8080/sellers?id=7",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -305,7 +305,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "4"
+									"value": "7"
 								}
 							]
 						}
@@ -318,7 +318,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/sellers?id=5",
+							"raw": "http://localhost:8080/sellers?id=11",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -330,7 +330,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "5"
+									"value": "11"
 								}
 							]
 						}
@@ -429,7 +429,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/products?id=4",
+							"raw": "http://localhost:8080/products?id=5",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -441,7 +441,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "4"
+									"value": "5"
 								}
 							]
 						}

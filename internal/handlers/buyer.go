@@ -19,7 +19,7 @@ func NewBuyerHandler(db database.Database) *BuyerHandler {
 }
 
 func (bh *BuyerHandler) GetBuyers(w http.ResponseWriter, r *http.Request) {
-	rows, err := bh.DB.QueryRows("SELECT id, name FROM order_service.buyers")
+	rows, err := bh.DB.QueryRows("SELECT id, name, email FROM order_service.buyers")
 	if err != nil {
 		log.Println("Error querying buyers:", err)
 		http.Error(w, "Failed to fetch buyers", http.StatusInternalServerError)
@@ -30,7 +30,7 @@ func (bh *BuyerHandler) GetBuyers(w http.ResponseWriter, r *http.Request) {
 	var buyers []models.Buyer
 	for rows.Next() {
 		var buyer models.Buyer
-		err := rows.Scan(&buyer.ID, &buyer.Name)
+		err := rows.Scan(&buyer.ID, &buyer.Name, &buyer.Email)
 		if err != nil {
 			log.Println("Error scanning buyer:", err)
 			http.Error(w, "Failed to fetch buyers", http.StatusInternalServerError)
@@ -61,8 +61,8 @@ func (bh *BuyerHandler) CreateBuyer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	statement := `INSERT INTO order_service.buyers (name) VALUES ($1) RETURNING id`
-	err = bh.DB.QueryRow(statement, buyer.Name).Scan(&buyer.ID)
+	statement := `INSERT INTO order_service.buyers (name, email, product_id) VALUES ($1, $2, $3) RETURNING id`
+	err = bh.DB.QueryRow(statement, buyer.Name, buyer.Email, buyer.ProductID).Scan(&buyer.ID)
 	if err != nil {
 		log.Println("Error creating buyer:", err)
 		http.Error(w, "Failed to create buyer", http.StatusInternalServerError)
@@ -89,8 +89,8 @@ func (bh *BuyerHandler) UpdateBuyer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	statement := `UPDATE order_service.buyers SET name = $1 WHERE id = $2`
-	_, err = bh.DB.Execute(statement, buyer.Name, buyerID)
+	statement := `UPDATE order_service.buyers SET name = $1, email = $2, product_id = $3 WHERE id = $4`
+	_, err = bh.DB.Execute(statement, buyer.Name, buyer.Email, buyer.ProductID, buyerID)
 	if err != nil {
 		log.Println("Error updating buyer:", err)
 		http.Error(w, "Failed to update buyer", http.StatusInternalServerError)
