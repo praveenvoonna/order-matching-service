@@ -69,7 +69,12 @@ func (ph *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(product)
+	err = json.NewEncoder(w).Encode(product)
+	if err != nil {
+		log.Println("Error encoding product:", err)
+		http.Error(w, "Failed to create product", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (ph *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
@@ -91,7 +96,12 @@ func (ph *ProductHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(product)
+	err = json.NewEncoder(w).Encode(product)
+	if err != nil {
+		log.Println("Error encoding product:", err)
+		http.Error(w, "Failed to update product", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (ph *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
